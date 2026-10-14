@@ -277,7 +277,7 @@ Los tests de `IsEmpty` ya están activos en `StringTest.c`. Corré `make test` y
 
 **P1** — `IsEmpty` podría haberse escrito también como `return s[0] == '\0'`. ¿Son equivalentes? ¿Por qué?
 
-> R:
+> R: son equivalentes porque por definicion s[i] equivale a *(s + i) y si i = 0: s[0]  ==  *(s + 0)  ==  *s
 
 ---
 
@@ -328,14 +328,14 @@ make test
 
 **P2** — ¿Qué hace `s + 1`? ¿Por qué avanza al siguiente carácter y no al siguiente byte?
 
-> R:
+> R: Devuelve un puntero que apunta al elemento siguiente a s. Porque justo en este caso el tamaño del char es de 1 byte, si fuera por ejemplo un int avanzaria 4 bytes.
 
 **P3** — Si llamaras a `GetLength(NULL)`, ¿qué pasaría? ¿Por qué las precondiciones del contrato dicen `s != NULL`?
 
-> R:
+> R: Pasaría comportamiento indefinido, que en la práctica suele ser una falla de segmentación (segmentation fault). GetLength(NULL) llama a IsEmpty(NULL), que ejecuta *s y desreferencia un puntero nulo. NULL no apunta a ningún objeto válido, así que leer esa dirección es un erro
 
 ```
-GETLENGTH_PASA=
+GETLENGTH_PASA=SI
 ```
 _(escribí SI cuando todos los tests de GetLength pasen)_
 
@@ -367,7 +367,9 @@ El `while` termina cuando alguna de las dos cadenas llega a `'\0'`. Después dev
 
 **P4** — ¿Qué dos casos están mal cubiertos por `return 1`? Describí un ejemplo para cada uno.
 
-> R:
+> R: 
+    1. s1 es prefijo propio de s2. Ejemplo: AreEqual("hola", "hola mundo"), el bucle compara h,o,l,a (todos iguales), s1 llega a '\0' y sale. Devuelve 1, pero debería devolver 0. Esto corresponde a la regla AreEqual(ε, t) = 0 si t ≠ ε.
+    2. s2 es prefijo propio de s1. Ejemplo: AreEqual("hola mundo", "hola"), el bucle sale al agotarse s2 y devuelve 1, cuando debería ser 0. Esto corresponde a AreEqual(s, ε) = 0 si s ≠ ε.
 
 #### Corrección
 
@@ -384,7 +386,7 @@ make test
 ```
 
 ```
-AREEQUAL_PASA=
+AREEQUAL_PASA=SI
 ```
 _(escribí SI cuando todos los tests de AreEqual pasen)_
 
@@ -404,7 +406,7 @@ Abrí `String.c` y mirá `AreDecimalDigits`:
 
 ```c
 int AreDecimalDigits(const char *s) {
-    if (IsEmpty(s)) return 1;  /* <-- acá está el bug */
+    if (IsEmpty(s)) return 0;  /* <-- acá está el bug */
     for (const char *p = s; !IsEmpty(p); p++)
         if (*p < '0' || *p > '9')
             return 0;
@@ -414,7 +416,7 @@ int AreDecimalDigits(const char *s) {
 
 **P5** — ¿Por qué la cadena vacía no debería considerarse un conjunto de dígitos decimales? Pensalo desde la especificación matemática.
 
-> R:
+> R:La especificación define explícitamente AreDecimalDigits(ε) = 0, y aclara que la cadena vacía no es un conjunto válido de dígitos porque se requiere al menos un carácter.
 
 #### Corrección
 
@@ -425,7 +427,7 @@ make test
 ```
 
 ```
-AREDECIMALDIGITS_PASA=
+AREDECIMALDIGITS_PASA=SI
 ```
 _(escribí SI cuando todos los tests de AreDecimalDigits pasen)_
 
@@ -452,7 +454,7 @@ make test
 ```
 
 ```
-CONTAINS_PASA=
+CONTAINS_PASA=SI
 ```
 _(escribí SI cuando todos los tests de Contains pasen)_
 
@@ -467,7 +469,7 @@ Antes de implementar, discutí con tu equipo:
 
 **P6** — Conclusión de la discusión:
 
-> R:
+> R:tiene más sentido separarla en un módulo Conversion, aunque ponerla en String no sería un error grave.
 
 ---
 
@@ -494,7 +496,7 @@ int ToInteger(const char *s) {
 
 **P7** — El loop acumula correctamente el valor en `resultado`. ¿Qué está mal en el `return`?
 
-> R:
+> R: El return devuelve signo en lugar de resultado
 
 #### Corrección
 
@@ -506,10 +508,10 @@ make test
 
 **P8** — La expresión `*s - '0'` convierte un carácter dígito al entero correspondiente. ¿Por qué funciona? ¿Qué devuelve `'3' - '0'`?
 
-> R:
+> R: Funciona porque en C un caracter es un entero pequeño. El estándar de C garantiza que los dígitos '0' a '9' tienen códigos consecutivos y en orden creciente. Por eso la distancia entre un dígito y '0' es exactamente el valor numérico del dígito. Al restar '0' se cancela el desplazamiento de la tabla y queda el número. '3' - '0' devuelve 3 ya que en ASCII seria 51 - 48 = 3.
 
 ```
-TOINTEGER_PASA=
+TOINTEGER_PASA=SI
 ```
 _(escribí SI cuando todos los tests de ToInteger pasen)_
 
@@ -562,7 +564,7 @@ foo
 
 **P9** — ¿Por qué `(void)argc` suprime un warning? ¿Cuándo sería necesario usar `argc`?
 
-> R:
+> R: La expresión (void)argc; es una sentencia que evalúa argc y descarta el resultado convirtiéndolo a void. *arg != NULL funciona como condición de corte y el recorrido por puntero (arg++) se detiene solo, sin necesidad de contar elementos por lo que no es necesario usar argc y seria redundante usarlo.
 
 ---
 
@@ -589,7 +591,7 @@ Salida esperada:
 ```
 
 ```
-LONGITUDES_PASA=
+LONGITUDES_PASA=SI
 ```
 _(SI o NO)_
 
@@ -616,7 +618,7 @@ make mayorlongitud
 ```
 
 ```
-MAYORLONGITUD_PASA=
+MAYORLONGITUD_PASA=SI
 ```
 _(SI o NO)_
 
@@ -635,7 +637,7 @@ make todosiguales
 ```
 
 ```
-TODOSIGUALES_PASA=
+TODOSIGUALES_PASA=SI
 ```
 _(SI o NO)_
 
@@ -652,7 +654,7 @@ make suma
 ```
 
 ```
-SUMA_PASA=
+SUMA_PASA=SI
 ```
 _(SI o NO)_
 
@@ -662,15 +664,16 @@ _(SI o NO)_
 
 **P10** — `GetLength` es recursiva pero en C una llamada recursiva consume un stack frame. Si llamaras `GetLength` con un string de 1.000.000 de caracteres, ¿qué pasaría? ¿Cómo lo resolverías?
 
-> R:
+> R: probablemente un stack overflow, que terminaria en una falla de segmentación. Para solucionarlo modificaria GetLength de una forma en la que sea iterativa usando espacio constante en la pila.
 
 **P11** — En la Parte III, todos los programas usan `char **arg` para iterar en vez de un índice entero. ¿Qué ventaja tiene este estilo? ¿Cuándo sería preferible usar el índice?
 
-> R:
+> R:Ventajas: No necesita argc, expresa mejor la intención, menos errores de límites y es el mismo idioma que se usa con cadenas. es preferible usar el indice cuando se necesita saber la posicion, para acceso aleatorio o no secuencial, cuando se valida la cantidad de argumentos o cuando el arreglo no tiene centinela.
+
 
 **P12** — En C, `"hola"` es un literal de tipo `const char *`. Si intentaras modificar un carácter con `s[0] = 'H'`, el comportamiento es indefinido. ¿Por qué? ¿En qué parte de la memoria viven los literales?
 
-> R:
+> R: Los literales de cadena son datos constantes que el compilador coloca en una sección de solo lectura del ejecutable, normalmente .rodata (read-only data), dentro del segmento de datos que el sistema operativo mapea sin permiso de escritura. No viven en la pila ni en el heap. Cuando se carga el programa, esas páginas de memoria tienen permisos de solo lectura, así que escribir en ellas hace que la CPU dispare una violación de acceso y el sistema operativo termina el proceso con segmentation fault.
 
 ---
 
