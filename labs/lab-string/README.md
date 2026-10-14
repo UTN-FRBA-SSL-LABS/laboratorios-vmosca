@@ -618,7 +618,7 @@ make mayorlongitud
 ```
 
 ```
-MAYORLONGITUD_PASA=SI
+MAYORLONGITUD_PASA=NO
 ```
 _(SI o NO)_
 
